@@ -10,6 +10,8 @@ mongoose.connect(process.env.mongoDb).then(()=> console.log('Mongodb server conn
 .catch(()=> console.log('Mongodb server not connected'))
 
 const userRoute = require('./routes/userRoute')
+const professionalRoute = require('./routes/professionalRoute')
+const adminRoute = require('./routes/adminRoute')
 
 app.use(cors({
     credentials:true,
@@ -19,5 +21,7 @@ app.use(cors({
 app.use(cookieParser())
 app.use(express.json())
 
-app.use('/api',userRoute) 
+app.use('/user',userRoute) 
+app.use('/admin',adminRoute) 
+app.use('/professional',professionalRoute) 
 app.listen(5000,()=>console.log("Server Conected"))

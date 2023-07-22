@@ -24,7 +24,7 @@ const adminLogin = async (req,res) => {
     }
 }
 
-const getUsers = async (req,res) => {
+const getTotalUsers = async (req,res) => {
     try {
         const userData = await User.find()
         res.json(userData)
@@ -33,7 +33,7 @@ const getUsers = async (req,res) => {
     }
 }
 
-const getProfessionals = async (req,res) => {
+const getTotalprofessionals = async (req,res) => {
     try {
         const professionalData = await Professional.find({approved : true})
         res.json(professionalData)
@@ -42,9 +42,45 @@ const getProfessionals = async (req,res) => {
     }
 }
 
-const getProfessionalReqeust = async (req,res) => {
+const getTotalRequestedprofessionals = async (req, res) => {
     try {
         const professionalData = await Professional.find({approved : false})
+        res.json(professionalData)
+    } catch (error) {
+        res.status(500).json({status : 'error', message : 'Professional fetching failed'})
+    }
+}
+
+const getUsers = async (req,res) => {
+    try {
+        const page = Number(req.query.page)
+        const limit = Number(req.query.limit)
+        const skip = (page - 1) * limit
+        const userData = await User.find().skip(skip).limit(limit)
+        res.json(userData)
+    } catch (error) {
+        res.status(500).json({status : 'error', message : 'User fetching failed'})
+    }
+}
+
+const getProfessionals = async (req,res) => {
+    try {
+        const page = Number(req.query.page)
+        const limit = Number(req.query.limit)
+        const skip = (page - 1) * limit
+        const professionalData = await Professional.find({approved : true}).skip(skip).limit(limit)
+        res.json(professionalData)
+    } catch (error) {
+        res.status(500).json({status : 'error', message : error.message})
+    }
+}
+
+const getProfessionalReqeust = async (req,res) => {
+    try {
+        const page = Number(req.query.page)
+        const limit = Number(req.query.limit)
+        const skip = (page - 1) * limit
+        const professionalData = await Professional.find({approved : false}).skip(skip).limit(limit)
         res.json(professionalData)
     } catch (error) {
         res.status(500).json({status : 'error', message : 'Professional fetching failed'})
@@ -126,5 +162,8 @@ module.exports = {
     rejectProfessionals,
     approveProfessionals,
     blockProfessionals,
-    unblockProfessionals
+    unblockProfessionals,
+    getTotalUsers,
+    getTotalprofessionals,
+    getTotalRequestedprofessionals
 }

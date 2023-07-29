@@ -1,6 +1,8 @@
 const Professional = require('../model/professionalModel')
+const User = require('../model/userModel')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { ObjectId } = require("mongodb")
 
 const professionalLogin = async (req,res) => {
     try {
@@ -29,7 +31,8 @@ const professionalLogin = async (req,res) => {
 const professionalRegister = async (req,res) => {
     try {
         const alreadydata = await Professional.findOne({email : req.body.email})
-        if(alreadydata){
+        const alreadyUser = await User.findOne({email : req.body.email})
+        if(alreadydata || alreadyUser){
             return res.status(400).json({
                 message : "Email Already Registered"
             })
@@ -59,7 +62,32 @@ const professionalRegister = async (req,res) => {
         res.status(500).json({status : 'error', message : 'professional register failed'})
     }    
 }
+
+const isBlocked = async (req,res) => {
+    try {
+        let { userid } = req.body
+        userid = new ObjectId(userid)
+        const professionalData = await Professional.findById(userid)
+        return res.status(200).json(professionalData._id)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
+const isApproved = async (req,res) => {
+    try {
+        const id = req.body.userid
+        const data = await Professional.findById(id)
+        return res.status(200).json( data.approved)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
 module.exports = {
     professionalLogin,
-    professionalRegister
+    professionalRegister,
+    isBlocked,
+    isApproved
 }

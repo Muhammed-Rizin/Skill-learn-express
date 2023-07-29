@@ -1,6 +1,8 @@
 const User = require('../model/userModel')
+const Professional = require('../model/professionalModel')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { ObjectId } = require("mongodb")
 
 const login = async (req,res) => {
     try{
@@ -28,7 +30,8 @@ const login = async (req,res) => {
 const register = async (req,res) =>{
     try {
         const alreadydata = await User.findOne({email : req.body.email})
-        if(alreadydata){
+        const alreadyProfessional = await Professional.findOne({email : req.body.email})
+        if(alreadydata || alreadyProfessional){
             return res.status(400).json({
                 message : "Email Already Registered"
             })
@@ -58,7 +61,32 @@ const register = async (req,res) =>{
     }
 }
 
+const userData = async (req,res) => {
+    try {
+        let { userid } = req.body
+        userid = new ObjectId(userid)
+        const userData = await User.findById(userid)
+        return res.status(200).json(userData)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
+const userDatabyEmail = async (req,res) => {
+    try {
+        const { email } = req.query
+        const userData = await Professional.findOne({email : email})
+        return res.status(200).json(userData)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
 module.exports = {
     login,
-    register
+    register,
+    userData,
+    userDatabyEmail
 }

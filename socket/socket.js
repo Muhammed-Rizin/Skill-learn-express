@@ -1,6 +1,6 @@
 const { Server } = require('socket.io')
 const Message = require('../model/chatModel');
-const { default: mongoose } = require('mongoose');
+const Call = require('../model/callModel')
 
 const configureSocket = async (http) => {
 
@@ -15,6 +15,7 @@ const configureSocket = async (http) => {
     io.on('connection', (socket) => {
         socket.on("join", (roomName) => {
             socket.join(roomName);
+            socket.broadcast.to(roomName).emit('member-joined')
         });
 
         socket.on("message", ({ message, roomName, from, to, type, receverType }, callback) => {
@@ -28,6 +29,7 @@ const configureSocket = async (http) => {
                         $addToSet: { users: [from, to] },
                     },
                     { upsert: true, new: true },
+                    
                 ).then((newMessage) => {
                     Message.findOne({ roomId: roomName })
                         .populate('messages.sender')
@@ -44,6 +46,31 @@ const configureSocket = async (http) => {
             } catch (error) {
                 console.log(error.message)
             }
+        });
+
+        socket.on('new-call', async ({ room, to, from }) => {
+            try {
+                const call = new Call({
+                    room : room,
+                    from : from,
+                    to : to,
+                    status : 'incoming'
+                })
+    
+                await call.save()
+        
+            } catch (error) {
+                console.log(error.message)
+            }
+        });
+
+        socket.on('disconnect-user', (roomId) => {
+            io.to(roomId).emit('user-disconnected', roomId);
+            socket.leave(roomId);
+        });
+        
+        socket.on('send-message', ({ message, roomId }) => {
+            socket.broadcast.to(roomId).emit('receive-message', message);
         });
     });
 

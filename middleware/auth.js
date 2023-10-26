@@ -5,7 +5,7 @@ const verify = (req, res, next) => {
 
     const authHeader = headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized by me' });
+        res.status(401).json({ message: 'Unauthorized' });
     }
     const token = authHeader.split(' ')[1];
 
@@ -15,7 +15,7 @@ const verify = (req, res, next) => {
         req.body.userid = decoded._id
 
     } catch (error) {
-        return res.status(401).json({ message: 'Unauthorized by you' });
+        res.status(401).json({ message: 'Unauthorized' });
     }
     next();
 }

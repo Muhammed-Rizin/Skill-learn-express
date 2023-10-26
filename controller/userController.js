@@ -4,19 +4,19 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { ObjectId } = require("mongodb")
 
-const login = async (req,res) => {
+exports.login = async (req,res) => {
     try{
         const userData = await User.findOne({email : req.body.email})
         if(!userData){
-            return res.status(404).json({message : 'User not Found'})
+            res.status(404).json({message : 'User not Found'})
         }
 
         if(userData.blocked === true){
-            return res.status(400).json({ message: 'This email id is blocked' });
+            res.status(400).json({ message: 'This email id is blocked' });
         }
         const password = await bcrypt.compare(req.body.password, userData.password)
         if(!password){
-            return res.status(400).json({message : 'Password Is incorrect'})
+            res.status(400).json({message : 'Password Is incorrect'})
         }
         const token = jwt.sign({_id : userData._id},'secret')
         await User.findByIdAndUpdate(userData._id, {token : token})
@@ -27,12 +27,12 @@ const login = async (req,res) => {
     }
 }
 
-const register = async (req,res) =>{
+exports.register = async (req,res) =>{
     try {
         const alreadydata = await User.findOne({email : req.body.email})
         const alreadyProfessional = await Professional.findOne({email : req.body.email})
         if(alreadydata || alreadyProfessional){
-            return res.status(400).json({
+            res.status(400).json({
                 message : "Email Already Registered"
             })
         }
@@ -61,32 +61,76 @@ const register = async (req,res) =>{
     }
 }
 
-const userData = async (req,res) => {
+exports.userData = async (req,res) => {
     try {
         let { userid } = req.body
         userid = new ObjectId(userid)
         const userData = await User.findById(userid)
-        return res.status(200).json(userData)
+        res.status(200).json(userData)
     } catch (error) {
         console.log(error)
         res.status(500).json({status: 'error', message: 'internal server error'})
     }
 }
 
-const userDatabyEmail = async (req,res) => {
+exports.userDatabyEmail = async (req,res) => {
     try {
         const { email } = req.query
         const userData = await Professional.findOne({email : email})
-        return res.status(200).json(userData)
+        res.status(200).json(userData)
     } catch (error) {
         console.log(error)
         res.status(500).json({status: 'error', message: 'internal server error'})
     }
 }
 
-module.exports = {
-    login,
-    register,
-    userData,
-    userDatabyEmail
+exports.updateUser = async (req, res) => {
+    try {
+        const userData = req.body.data
+        await User.findByIdAndUpdate(userData._id, {$set : userData})
+        res.status(200).json(userData)
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
+exports.isBlocked = async (req,res) => {
+    try {
+        const id = req.query.userid
+        const data = await User.find(id)
+
+        res.status(200).json( data.blocked)
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
+exports.professionalsList = async (req, res) => {
+    try {
+        const page = req.query.page
+        
+        const limit = 5
+        const skip = (page - 1) * limit
+
+        const data = await Professional.find({approved : true, blocked : false}).skip(skip).limit(limit)
+        const totalProfessional = (await Professional.find({approved : true, blocked : false})).length
+
+        res.status(200).json({data, totalProfessional})
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
+}
+
+exports.setNotification = async (req, res) => {
+    try {
+        const token = req.body.token
+        const id = req.body.userid
+        await User.findByIdAndUpdate(id, {$set : {notificationToken : token}})
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({status: 'error', message: 'internal server error'})
+    }
 }

@@ -6,10 +6,12 @@ const app = express()
 const httpServer = require('http').createServer(app);
 const dotenv = require("dotenv");dotenv.config()
 
+const configureSocket = require('./socket/socket');
 const userRoute = require('./routes/userRoute')
 const professionalRoute = require('./routes/professionalRoute')
 const adminRoute = require('./routes/adminRoute')
-const configureSocket = require('./socket/socket');
+const reviewRoute = require('./routes/reviewRoute')
+const paymentRoute = require('./routes/paymentRoute')
 
 mongoose.connect(process.env.mongoDb)
 .then(() => console.log('Mongodb server connected'))
@@ -28,4 +30,7 @@ app.use(cors({
 app.use('/user', userRoute)
 app.use('/admin', adminRoute)
 app.use('/professional', professionalRoute)
+app.use('/review', reviewRoute)
+app.use('/payment', paymentRoute)
+
 httpServer.listen(5000, () => console.log("Server Conected"))

@@ -1,53 +1,60 @@
 const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
-    email : {
-        type : String,
-        required : true
+    email: {
+        type: String,
+        required: true
     },
-    password : {
-        type : String,
-        required : true
+    password: {
+        type: String,
+        required: true
     },
-    firstName : {
-        type : String,
-        required : true
+    firstName: {
+        type: String,
+        required: true
     },
-    lastName : {
-        type : String,
-        required : true
+    lastName: {
+        type: String,
+        required: true
     },
-    education : {
-        type : String,
-        required : true
+    education: {
+        type: String,
+        required: true
     },
-    location : {
-        type : String
+    location: {
+        type: String
     },
-    birthday : {
-        type : Date
+    birthday: {
+        type: Date
     },
-    bio : {
-        type : String
+    bio: {
+        type: String
     },
-    address : {
-        type : String
+    address: {
+        type: String
     },
-    image : {
-        type : String
+    image: {
+        type: String
     },
-    google : {
-        type : Boolean,
+    google: {
+        type: Boolean,
+        default: false
+    },
+    blocked: {
+        type: Boolean,
+        default: false
+    },
+    emailVerified: {
+        type: Boolean,
         default : false
     },
-    blocked : {
-        type : Boolean,
-        default : false
+    token: {
+        type: String
     },
-    emailVerified : {
-        type : Boolean
+    emailToken: {
+        type: String
     },
-    token : {
+    notificationToken : {
         type : String
     }
 })

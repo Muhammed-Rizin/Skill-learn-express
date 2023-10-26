@@ -9,7 +9,7 @@ const adminLogin = async (req,res) => {
         const { email, password } = req.body
         const adminData = await Admin.findOne({email : email})
         if(!adminData || adminData.password !== password){
-            return res.status(404).json({
+            res.status(404).json({
                 message : 'Email or password is incorrect'
             })
         }
